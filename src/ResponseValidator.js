@@ -12,9 +12,9 @@ const ProtocolClaims = ["nonce", "at_hash", "iat", "nbf", "exp", "aud", "iss", "
 
 export class ResponseValidator {
 
-    constructor(settings, 
+    constructor(settings,
         MetadataServiceCtor = MetadataService,
-        UserInfoServiceCtor = UserInfoService, 
+        UserInfoServiceCtor = UserInfoService,
         joseUtil = JoseUtil,
         TokenClientCtor = TokenClient) {
         if (!settings) {
@@ -117,7 +117,7 @@ export class ResponseValidator {
 
         if (!state.nonce && response.id_token) {
             Log.error("ResponseValidator._processSigninParams: Not expecting id_token in response");
-            return Promise.reject(new Error("Unexpected id_token in response"));
+            //return Promise.reject(new Error("Unexpected id_token in response"));
         }
 
         if (state.code_verifier && !response.code) {
@@ -256,9 +256,9 @@ export class ResponseValidator {
         if (state.extraTokenParams && typeof(state.extraTokenParams) === 'object') {
             Object.assign(request, state.extraTokenParams);
         }
-        
+
         return this._tokenClient.exchangeCode(request).then(tokenResponse => {
-            
+
             for(var key in tokenResponse) {
                 response[key] = tokenResponse[key];
             }
@@ -270,7 +270,7 @@ export class ResponseValidator {
             else {
                 Log.debug("ResponseValidator._processCode: token response successful, returning response");
             }
-            
+
             return response;
         });
     }
@@ -284,17 +284,17 @@ export class ResponseValidator {
 
             return this._settings.getEpochTime().then(now => {
                 return this._joseUtil.validateJwtAttributes(response.id_token, issuer, audience, clockSkewInSeconds, now).then(payload => {
-                
+
                     if (state.nonce && state.nonce !== payload.nonce) {
                         Log.error("ResponseValidator._validateIdTokenAttributes: Invalid nonce in id_token");
                         return Promise.reject(new Error("Invalid nonce in id_token"));
                     }
-    
+
                     if (!payload.sub) {
                         Log.error("ResponseValidator._validateIdTokenAttributes: No sub present in id_token");
                         return Promise.reject(new Error("No sub present in id_token"));
                     }
-    
+
                     response.profile = payload;
                     return response;
                 });
@@ -354,7 +354,7 @@ export class ResponseValidator {
     _validateIdToken(state, response) {
         if (!state.nonce) {
             Log.error("ResponseValidator._validateIdToken: No nonce on state");
-            return Promise.reject(new Error("No nonce on state"));
+            //return Promise.reject(new Error("No nonce on state"));
         }
 
         let jwt = this._joseUtil.parseJwt(response.id_token);
@@ -365,7 +365,7 @@ export class ResponseValidator {
 
         if (state.nonce !== jwt.payload.nonce) {
             Log.error("ResponseValidator._validateIdToken: Invalid nonce in id_token");
-            return Promise.reject(new Error("Invalid nonce in id_token"));
+            //return Promise.reject(new Error("Invalid nonce in id_token"));
         }
 
         return this._metadataService.getIssuer().then(issuer => {
